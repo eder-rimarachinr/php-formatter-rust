@@ -1,0 +1,17 @@
+[package]
+name = "php_formatter"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "php_formatter"
+path = "src/main.rs"
+
+[dependencies]
+tree-sitter = "0.23"
+tree-sitter-php = "0.23"
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true
