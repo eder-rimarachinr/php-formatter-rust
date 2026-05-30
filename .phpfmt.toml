@@ -1,0 +1,26 @@
+# .phpfmt.toml
+
+[style]
+# Number of spaces per indentation level.
+indent_size = 4
+
+[align]
+# Align `=` in consecutive assignment blocks:
+#   $a   = 1;
+#   $foo = 2;
+assignments = true
+
+# Align `=>` in consecutive array / match lines:
+#   'key'     => 1,
+#   'longkey' => 2,
+fat_arrows = true
+
+# Align inline `//` comments on consecutive lines:
+#   $a = 1;  // first
+#   $b = 2;  // second
+inline_comments = true
+
+[on_save]
+# Format automatically when the file is saved.
+# Overrides the VS Code `phpFormatter.formatOnSave` setting.
+enabled = false
