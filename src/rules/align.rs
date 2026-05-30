@@ -11,7 +11,7 @@
 ///   $longerVar = 3;
 use crate::formatter::Line;
 
-pub fn align_assignments(lines: &mut Vec<Line>) {
+pub fn align_assignments(lines: &mut [Line]) {
     let mut i = 0;
     while i < lines.len() {
         // Find start of an assignment block
