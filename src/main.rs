@@ -1,6 +1,5 @@
 mod config;
 mod formatter;
-mod parser;
 mod protocol;
 mod rules;
 
