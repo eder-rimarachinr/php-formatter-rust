@@ -50,10 +50,11 @@ fn dispatch(req: Request) -> Response {
         None => return Response::error("missing 'source' field".into()),
     };
 
+    let stop_at = req.workspace_root.as_deref().map(Path::new);
     let config = req
         .file_path
         .as_deref()
-        .map(|p| Config::discover(Path::new(p)))
+        .map(|p| Config::discover(Path::new(p), stop_at))
         .unwrap_or_default();
 
     match req.command.as_str() {
@@ -123,7 +124,7 @@ fn cmd_check(source: String, config: Config) -> Response {
 fn run_legacy_mode(args: &[String]) {
     let (source, config) = if args.len() > 1 {
         let path = std::path::PathBuf::from(&args[1]);
-        let cfg = Config::discover(&path);
+        let cfg = Config::discover(&path, None);
         let src = std::fs::read_to_string(&path).unwrap_or_else(|e| {
             eprintln!("Error reading {}: {e}", path.display());
             std::process::exit(1);

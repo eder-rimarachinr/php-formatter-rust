@@ -33,12 +33,19 @@ impl Default for Config {
 }
 
 impl Config {
-    /// Walk up from `from` searching for `.phpfmt.toml`. Falls back to defaults.
-    pub fn discover(from: &Path) -> Self {
-        let start = if from.is_file() {
-            from.parent().unwrap_or(from)
+    /// Walk up from `from` searching for `.phpfmt.toml`, stopping at `stop_at`.
+    /// Both paths are canonicalized first to resolve symlinks (SEC-007).
+    /// Discovery never traverses past `stop_at`, preventing config pickup from
+    /// ancestor directories outside the workspace (SEC-006).
+    pub fn discover(from: &Path, stop_at: Option<&Path>) -> Self {
+        // SEC-007: canonicalize to resolve symlinks before traversal.
+        let canonical_from = std::fs::canonicalize(from).unwrap_or_else(|_| from.to_path_buf());
+        let canonical_stop = stop_at.map(|p| std::fs::canonicalize(p).unwrap_or_else(|_| p.to_path_buf()));
+
+        let start = if canonical_from.is_file() {
+            canonical_from.parent().unwrap_or(&canonical_from).to_path_buf()
         } else {
-            from
+            canonical_from.clone()
         };
 
         let mut dir = start;
@@ -50,8 +57,15 @@ impl Config {
                 }
                 break;
             }
+            // SEC-006: stop at workspace root — never read config from ancestors
+            // outside the workspace boundary supplied by the extension.
+            if let Some(ref root) = canonical_stop {
+                if dir == *root {
+                    break;
+                }
+            }
             match dir.parent() {
-                Some(p) if p != dir => dir = p,
+                Some(p) if p != dir => dir = p.to_path_buf(),
                 _ => break,
             }
         }

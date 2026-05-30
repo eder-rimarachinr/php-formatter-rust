@@ -3,6 +3,7 @@ pub struct Request {
     pub command: String,
     pub source: Option<String>,
     pub file_path: Option<String>,
+    pub workspace_root: Option<String>,
 }
 
 impl Request {
@@ -14,7 +15,8 @@ impl Request {
             .to_string();
         let source = v["source"].as_str().map(|s| s.to_string());
         let file_path = v["file_path"].as_str().map(|s| s.to_string());
-        Ok(Self { command, source, file_path })
+        let workspace_root = v["workspace_root"].as_str().map(|s| s.to_string());
+        Ok(Self { command, source, file_path, workspace_root })
     }
 }
 
