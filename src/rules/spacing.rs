@@ -2,19 +2,21 @@
 
 /// Ensures exactly one space around binary operators: = += -= *= /= .= == === != !== < > <= >= && || ? :
 pub fn normalize_operators(line: &str) -> String {
-    // We do a simple pass: collapse multiple spaces around = to exactly one,
-    // but only outside strings. A full AST-based pass handles complex cases.
-    let mut result = String::with_capacity(line.len());
     let bytes = line.as_bytes();
     let len = bytes.len();
-    let mut i = 0;
+
+    // Preserve leading whitespace as-is
+    let indent_end = bytes.iter().take_while(|&&b| b == b' ' || b == b'\t').count();
+    let mut result = String::with_capacity(line.len());
+    result.push_str(&line[..indent_end]);
+
+    let mut i = indent_end;
     let mut in_single = false;
     let mut in_double = false;
 
     while i < len {
         let ch = bytes[i] as char;
 
-        // Track string context (simple — no heredoc support here)
         if ch == '\'' && !in_double {
             in_single = !in_single;
             result.push(ch);
@@ -34,7 +36,7 @@ pub fn normalize_operators(line: &str) -> String {
             continue;
         }
 
-        // Collapse multiple spaces to single (outside strings)
+        // Collapse multiple spaces to single (outside strings, after indent)
         if ch == ' ' {
             result.push(' ');
             i += 1;
